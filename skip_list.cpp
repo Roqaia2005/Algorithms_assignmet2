@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <cstring>
+#include <string>
 using namespace std;
 class Node{
     public:
@@ -14,6 +15,7 @@ class Node{
     }
 
 };
+
 class SkipList{
     int max_level;
     int p;
@@ -30,8 +32,8 @@ class SkipList{
     int createRandomLevel(){
         float random =(float)rand()/RAND_MAX;//rand value from 1 to 0
         int lvl=0;
-        while (random<p&&level<max_level) {
-            level++;
+        while (random<p&&lvl<max_level) {
+            lvl++;
             random=(float)rand()/RAND_MAX;
         
         }
@@ -80,6 +82,7 @@ class SkipList{
 
 
 }
+
 void deleteNode(int value){
     Node*curNode=header; //current node is header
         Node* update[max_level+1];
