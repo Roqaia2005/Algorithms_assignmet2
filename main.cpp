@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <cmath>
 using namespace std;
 //------------------------------------------------------------ Hashing Techniques------------------------------------
@@ -58,6 +59,14 @@ public:
       int index = divisionMethod(k, hashtableSize);
       hashTable[index].push_back(k);
   }
+
+  void deleteItem(int k){
+        int index = divisionMethod(k, hashtableSize);
+        auto it = find(hashTable[index].begin(), hashTable[index].end(), k);
+        if (it != hashTable[index].end()){
+            hashTable[index].erase(it);
+        }
+    }
   //function for displaying items in table
   void displayChainHashTable(){
       for (int i = 0; i < hashtableSize; ++i) {
@@ -86,7 +95,7 @@ public:
         this->hashTableSize = hashSize;
         table = new hashNode*[hashTableSize];
         for (int i = 0; i < hashTableSize; ++i) {
-            table[i] = NULL;
+            table[i] = nullptr;
         }
     }
     //key and value
@@ -98,19 +107,42 @@ public:
         //get hash index
         int index = divisionMethod(k, hashTableSize);
         //we linearly probe for the next bucket We keep probing until an empty bucket is found.
-        while (table[index] != NULL && table[index]->k != k && table[index]->k != -1){
+        while (table[index] != nullptr && table[index]->k != k && table[index]->k != -1){
             index++;
             index %= hashTableSize;
         }
         //insert node and increment size by one
-        if (table[index] == NULL || table[index]->k == -1){
+        if (table[index] == nullptr || table[index]->k == -1){
             size++;
         }
         table[index] = tempNode;
     }
+
+    void deleteItem(int k){
+        int index = divisionMethod(k, hashTableSize);
+        cout << index << "\n";
+        int initial = index;
+        while (table[index] != nullptr){
+            cout << "-----------------\n";
+            if (table[index]->k == k){
+                table[index]->k = -1;
+                table[index]->value = -1;
+                size--;
+                cout << "deleted!\n";
+                return;
+            }
+            index++;
+            index %= hashTableSize;
+            if (index == initial){
+                break;
+            }
+            cout << index << "\n";
+        }
+        cout << "not found!\n";
+    }
     void displayLinearProbing(){
         for (int i = 0; i < hashTableSize; ++i) {
-            if (table[i] != NULL && table[i]->k != -1){
+            if (table[i] != nullptr && table[i]->k != -1){
                 cout << "Index: " << i << " key: " << table[i]->k  << " value: " << table[i]->value << "\n";
 
             }
@@ -154,6 +186,26 @@ public:
         }
         table[index] = tempNode;
     }
+
+    void deleteItem(int k){
+        int index = divisionMethod(k, hashTableSize);
+        int j = 1;
+        while (table[index] != NULL){
+            if (table[index]->k == k){
+                table[index]->k = -1;
+                table[index]->value = -1;
+                size--;
+                cout << "deleted!\n";
+                return;
+            }
+
+            index = index + (j*j);
+            index %= hashTableSize;
+            j++;
+        }
+        cout << "not found!\n";
+    }
+
     void displayQuadraticProbing(){
         for (int i = 0; i < hashTableSize; ++i) {
             if (table[i] != NULL && table[i]->k != -1){
@@ -220,6 +272,23 @@ public:
         hashTable[h1] = value;
     }
 
+    void deleteItem(int k){
+        int h1 = hashMethod1(k);
+        int h2 = hashMethod2(k);
+        int intitial = h1;
+        while (hashTable[h1] != -1){
+            if (hashTable[h1] == k){
+                hashTable[h1] = -1;
+                cout << "deleted!\n";
+            }
+            h1 = (h1+h2) % hashTableSize;
+            //to avoid infinite loop case
+            if (h1 == intitial){
+                break;
+            }
+        }
+        cout << "not found";
+    }
     void displayDoubleHashing(){
         for (int i = 0; i < hashTableSize; ++i) {
             if (hashTable[i] != -1)
@@ -242,8 +311,10 @@ int main() {
 //    chain.insert(4);
 //    chain.insert(2);
 //    chain.displayChainHashTable();
-
-//    linearProbing lp(20);
+//    chain.deleteItem(5);
+//    cout << "-------------------------------\n";
+//    chain.displayChainHashTable();
+//    linearProbing lp(5);
 //
 //    lp.insert(1, 5);
 //    lp.insert(2, 15);
@@ -251,6 +322,10 @@ int main() {
 //    lp.insert(4, 7);
 //    std::cout << "Hash Table Contents:" << std::endl;
 //    lp.displayLinearProbing();
+//    lp.deleteItem(2);
+//    cout << "------------------------\n";
+//    lp.displayLinearProbing();
+
 //    quadraticProbing qp(20);
 //
 //    qp.insert(1, 5);
@@ -258,7 +333,8 @@ int main() {
 //    qp.insert(3, 20);
 //    qp.insert(4, 7);
 //
-//    std::cout << "Hash Table Contents:" << std::endl;
+//    qp.displayQuadraticProbing();
+//    qp.deleteItem(1);
 //    qp.displayQuadraticProbing();
 
 
@@ -270,7 +346,8 @@ int main() {
     dh.insert(66);
     dh.insert(123);
 
-    cout << "Hash Table Contents:" << endl;
+    dh.displayDoubleHashing();
+    dh.deleteItem(66);
     dh.displayDoubleHashing();
 
     return 0;
