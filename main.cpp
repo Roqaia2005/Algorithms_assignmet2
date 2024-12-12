@@ -60,13 +60,7 @@ public:
       hashTable[index].push_back(k);
   }
 
-  void deleteItem(int k){
-        int index = divisionMethod(k, hashtableSize);
-        auto it = find(hashTable[index].begin(), hashTable[index].end(), k);
-        if (it != hashTable[index].end()){
-            hashTable[index].erase(it);
-        }
-    }
+  
   //function for displaying items in table
   void displayChainHashTable(){
       for (int i = 0; i < hashtableSize; ++i) {
@@ -118,28 +112,7 @@ public:
         table[index] = tempNode;
     }
 
-    void deleteItem(int k){
-        int index = divisionMethod(k, hashTableSize);
-        cout << index << "\n";
-        int initial = index;
-        while (table[index] != nullptr){
-            cout << "-----------------\n";
-            if (table[index]->k == k){
-                table[index]->k = -1;
-                table[index]->value = -1;
-                size--;
-                cout << "deleted!\n";
-                return;
-            }
-            index++;
-            index %= hashTableSize;
-            if (index == initial){
-                break;
-            }
-            cout << index << "\n";
-        }
-        cout << "not found!\n";
-    }
+  
     void displayLinearProbing(){
         for (int i = 0; i < hashTableSize; ++i) {
             if (table[i] != nullptr && table[i]->k != -1){
@@ -187,24 +160,7 @@ public:
         table[index] = tempNode;
     }
 
-    void deleteItem(int k){
-        int index = divisionMethod(k, hashTableSize);
-        int j = 1;
-        while (table[index] != NULL){
-            if (table[index]->k == k){
-                table[index]->k = -1;
-                table[index]->value = -1;
-                size--;
-                cout << "deleted!\n";
-                return;
-            }
-
-            index = index + (j*j);
-            index %= hashTableSize;
-            j++;
-        }
-        cout << "not found!\n";
-    }
+   
 
     void displayQuadraticProbing(){
         for (int i = 0; i < hashTableSize; ++i) {
@@ -272,23 +228,7 @@ public:
         hashTable[h1] = value;
     }
 
-    void deleteItem(int k){
-        int h1 = hashMethod1(k);
-        int h2 = hashMethod2(k);
-        int intitial = h1;
-        while (hashTable[h1] != -1){
-            if (hashTable[h1] == k){
-                hashTable[h1] = -1;
-                cout << "deleted!\n";
-            }
-            h1 = (h1+h2) % hashTableSize;
-            //to avoid infinite loop case
-            if (h1 == intitial){
-                break;
-            }
-        }
-        cout << "not found";
-    }
+   
     void displayDoubleHashing(){
         for (int i = 0; i < hashTableSize; ++i) {
             if (hashTable[i] != -1)
@@ -311,9 +251,6 @@ int main() {
 //    chain.insert(4);
 //    chain.insert(2);
 //    chain.displayChainHashTable();
-//    chain.deleteItem(5);
-//    cout << "-------------------------------\n";
-//    chain.displayChainHashTable();
 //    linearProbing lp(5);
 //
 //    lp.insert(1, 5);
@@ -321,9 +258,6 @@ int main() {
 //    lp.insert(3, 20);
 //    lp.insert(4, 7);
 //    std::cout << "Hash Table Contents:" << std::endl;
-//    lp.displayLinearProbing();
-//    lp.deleteItem(2);
-//    cout << "------------------------\n";
 //    lp.displayLinearProbing();
 
 //    quadraticProbing qp(20);
@@ -333,8 +267,6 @@ int main() {
 //    qp.insert(3, 20);
 //    qp.insert(4, 7);
 //
-//    qp.displayQuadraticProbing();
-//    qp.deleteItem(1);
 //    qp.displayQuadraticProbing();
 
 
@@ -347,8 +279,7 @@ int main() {
     dh.insert(123);
 
     dh.displayDoubleHashing();
-    dh.deleteItem(66);
-    dh.displayDoubleHashing();
+
 
     return 0;
 }
