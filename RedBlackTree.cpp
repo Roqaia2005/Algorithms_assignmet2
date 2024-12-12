@@ -152,7 +152,86 @@ private:
 
     // Fix violations after deletion
     void resolveDelete(TreeNode* node) {
-        // Similar structure to original logic
+        while (node !=  rootNode && node->nodeColor == BLACK) {
+            if (node == node->parentNode->leftChild) {
+                TreeNode* sibling = node->parentNode->rightChild;
+
+                // Case 1: Sibling is RED
+                if (sibling->nodeColor == RED) {
+                    // Change sibling's color to BLACK and parent's color to RED
+                    sibling->nodeColor = BLACK;
+                    node->parentNode->nodeColor = RED;
+
+                    // Perform a left rotation on parent
+                    rotateLeft(node->parentNode);
+                    sibling = node->parentNode->rightChild;
+                }
+
+                // Case 2: Sibling and its children are BLACK
+                if ((sibling->leftChild == nullptr || sibling->leftChild->nodeColor == BLACK) &&
+                    (sibling->rightChild == nullptr || sibling->rightChild->nodeColor == BLACK)) {
+                    sibling->nodeColor = RED;
+                    node = node->parentNode;
+                } else {
+                    // Case 3: Sibling's right child is BLACK, left child is RED
+                    if (sibling->rightChild == nullptr || sibling->rightChild->nodeColor == BLACK) {
+                        if (sibling->leftChild != nullptr)
+                            sibling->leftChild->nodeColor = BLACK;
+                        sibling->nodeColor = RED;
+                        rotateRight(sibling);
+                        sibling = node->parentNode->rightChild;
+                    }
+
+                    // Case 4: Sibling's right child is RED
+                    sibling->nodeColor = node->parentNode->nodeColor;
+                    node->parentNode->nodeColor = BLACK;
+                    if (sibling->rightChild != nullptr)
+                        sibling->rightChild->nodeColor = BLACK;
+
+                    rotateLeft(node->parentNode);
+                    node =  rootNode;
+                }
+            } else {
+                // Symmetric cases when node is the right child of its parent
+                TreeNode* sibling = node->parentNode->leftChild;
+
+                // Case 1: Sibling is RED
+                if (sibling->nodeColor == RED) {
+                    sibling->nodeColor = BLACK;
+                    node->parentNode->nodeColor = RED;
+                    rotateRight(node->parentNode);
+                    sibling = node->parentNode->leftChild;
+                }
+
+                // Case 2: Sibling and its children are BLACK
+                if ((sibling->leftChild == nullptr || sibling->leftChild->nodeColor == BLACK) &&
+                    (sibling->rightChild == nullptr || sibling->rightChild->nodeColor == BLACK)) {
+                    sibling->nodeColor = RED;
+                    node = node->parentNode;
+                } else {
+                    // Case 3: Sibling's left child is BLACK, right child is RED
+                    if (sibling->leftChild == nullptr || sibling->leftChild->nodeColor == BLACK) {
+                        if (sibling->rightChild != nullptr)
+                            sibling->rightChild->nodeColor = BLACK;
+                        sibling->nodeColor = RED;
+                        rotateLeft(sibling);
+                        sibling = node->parentNode->leftChild;
+                    }
+
+                    // Case 4: Sibling's left child is RED
+                    sibling->nodeColor = node->parentNode->nodeColor;
+                    node->parentNode->nodeColor = BLACK;
+                    if (sibling->leftChild != nullptr)
+                        sibling->leftChild->nodeColor = BLACK;
+
+                    rotateRight(node->parentNode);
+                    node =  rootNode;
+                }
+            }
+        }
+
+        // Ensure the root is black
+        node->nodeColor = BLACK;
     }
 
     // Find the smallest node in a subtree
@@ -229,20 +308,32 @@ public:
 int main() {
     RBTree tree;
 
-    tree.addValue(10);
     tree.addValue(5);
-    tree.addValue(15);
     tree.addValue(3);
     tree.addValue(7);
-    tree.addValue(12);
-    tree.addValue(18);
+    tree.addValue(2);
+    tree.addValue(4);
+    tree.addValue(6);
+    tree.addValue(20);
+    tree.addValue(10);
+    tree.addValue(30);
+
+
 
     std::cout << "Tree structure:" << std::endl;
     tree.showTree();
 
+    tree.deleteValue(10);
+    tree.deleteValue(3);
+    tree.deleteValue(7);
     tree.deleteValue(5);
-    std::cout << "\nAfter deleting value 5:" << std::endl;
+    tree.deleteValue(2);
+    tree.deleteValue(30);
+    tree.deleteValue(4);
+
+    std::cout << "\nAfter deleting :"<< std::endl;
     tree.showTree();
+
 
     return 0;
 }

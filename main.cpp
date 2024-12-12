@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <cmath>
 using namespace std;
 //------------------------------------------------------------ Hashing Techniques------------------------------------
@@ -59,6 +60,8 @@ public:
       int index = divisionMethod(k, hashtableSize);
       hashTable[index].push_back(k);
   }
+
+  
   //function for displaying items in table
   void displayChainHashTable(){
       for (int i = 0; i < hashtableSize; ++i) {
@@ -87,7 +90,7 @@ public:
         this->hashTableSize = hashSize;
         table = new hashNode*[hashTableSize];
         for (int i = 0; i < hashTableSize; ++i) {
-            table[i] = NULL;
+            table[i] = nullptr;
         }
     }
     //key and value
@@ -99,19 +102,21 @@ public:
         //get hash index
         int index = divisionMethod(k, hashTableSize);
         //we linearly probe for the next bucket We keep probing until an empty bucket is found.
-        while (table[index] != NULL && table[index]->k != k && table[index]->k != -1){
+        while (table[index] != nullptr && table[index]->k != k && table[index]->k != -1){
             index++;
             index %= hashTableSize;
         }
         //insert node and increment size by one
-        if (table[index] == NULL || table[index]->k == -1){
+        if (table[index] == nullptr || table[index]->k == -1){
             size++;
         }
         table[index] = tempNode;
     }
+
+  
     void displayLinearProbing(){
         for (int i = 0; i < hashTableSize; ++i) {
-            if (table[i] != NULL && table[i]->k != -1){
+            if (table[i] != nullptr && table[i]->k != -1){
                 cout << "Index: " << i << " key: " << table[i]->k  << " value: " << table[i]->value << "\n";
 
             }
@@ -155,6 +160,9 @@ public:
         }
         table[index] = tempNode;
     }
+
+   
+
     void displayQuadraticProbing(){
         for (int i = 0; i < hashTableSize; ++i) {
             if (table[i] != NULL && table[i]->k != -1){
@@ -221,6 +229,7 @@ public:
         hashTable[h1] = value;
     }
 
+   
     void displayDoubleHashing(){
         for (int i = 0; i < hashTableSize; ++i) {
             if (hashTable[i] != -1)
@@ -243,8 +252,7 @@ int main() {
 //    chain.insert(4);
 //    chain.insert(2);
 //    chain.displayChainHashTable();
-
-//    linearProbing lp(20);
+//    linearProbing lp(5);
 //
 //    lp.insert(1, 5);
 //    lp.insert(2, 15);
@@ -252,6 +260,7 @@ int main() {
 //    lp.insert(4, 7);
 //    std::cout << "Hash Table Contents:" << std::endl;
 //    lp.displayLinearProbing();
+
 //    quadraticProbing qp(20);
 //
 //    qp.insert(1, 5);
@@ -259,7 +268,6 @@ int main() {
 //    qp.insert(3, 20);
 //    qp.insert(4, 7);
 //
-//    std::cout << "Hash Table Contents:" << std::endl;
 //    qp.displayQuadraticProbing();
 
 
@@ -271,8 +279,8 @@ int main() {
     dh.insert(66);
     dh.insert(123);
 
-    cout << "Hash Table Contents:" << endl;
     dh.displayDoubleHashing();
+
 
     return 0;
 }
