@@ -31,12 +31,15 @@ class SkipList{
     }
     int createRandomLevel(){
         float random =(float)rand()/RAND_MAX;//rand value from 1 to 0
+    
+
         int lvl=0;
         while (random<p&&lvl<max_level) {
             lvl++;
             random=(float)rand()/RAND_MAX;
         
         }
+
         return lvl;
         
     }
@@ -103,17 +106,21 @@ void deleteNode(int value){
                 }
                 update[i]->next[i] = curNode->next[i];
             }
-            while(level>0 &&header->next[level] == 0){
+            while(level>0 &&header->next[level] == NULL){
                 level--;
             }
             cout<<"Successfully deleted value "<<value<<"\n";
 
         }
-        cout<<"failed to delete node";
+        else{
+        cout<<"failed to delete node "<<value;
+
+
+        }
 }
 
 void search(int value){
-    Node*curNode;
+    Node*curNode=header;
     for(int i=level;i>=0;i--){
         while(curNode->next[i] &&curNode->next[i]->value < value){
             curNode = curNode->next[i];
@@ -121,14 +128,13 @@ void search(int value){
 
     }
     curNode=curNode->next[0];
-    if(curNode->value==value){
-        cout<<"value"<<value<<"found";
+    if(curNode&&curNode->value==value){
+        cout<<"value "<<value<<" found\n";
+        
 }
     else{
-    cout<<"value not found";
+    cout<<"value "<<value <<" not found\n";
 }
-
-    
 
 }
 
@@ -148,12 +154,13 @@ void display()
     }
 }
 };
+
 int main()
 {
     // Seed random number generator
     srand((unsigned)time(0));
 
-    // create SkipList object with MAXLVL and P
+
     SkipList lst(3, 0.5);
 
     lst.addNode(3);
@@ -166,7 +173,14 @@ int main()
     lst.addNode(26);
     lst.addNode(21);
     lst.addNode(25);
-    // lst.search(7);
-    lst.deleteNode(0);
+    lst.display();
+
+
+    lst.search(21);
+    lst.search(50);
+
+    
+    lst.deleteNode(21);
+    lst.search(21);// to make sure that 21 successfully deleted
     lst.display();
 }

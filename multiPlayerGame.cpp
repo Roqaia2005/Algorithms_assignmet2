@@ -179,7 +179,7 @@ void display()
 ////////////////////////////////////////////////////////
 int main() {
 
-    SkipListPlayer game(5,0.5);
+    SkipListPlayer game(4,0.5);
 
     // Players join the game
     game.addPlayer("Player1", 100);
@@ -187,8 +187,7 @@ int main() {
     game.addPlayer("Player3", 80);
 
     // Dynamic score updates
-    game.addPlayer("Player1", 90);  // Update Player1's score
-
+    game.addPlayer("Player1", 90);
     // Retrieve leaderboard
     cout << "Leaderboard:\n";
     auto leaderboard = game.getTopN(2);// top 2 players 1,3
