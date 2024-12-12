@@ -1,248 +1,390 @@
+// C++ Program to Implement Red Black Tree
+
 #include <iostream>
+using namespace std;
 
-enum NodeColor { RED, BLACK };
+// Enumeration for colors of nodes in Red-Black Tree
+enum Color { RED, BLACK };
 
-struct TreeNode {
-    int value;
-    NodeColor nodeColor;
-    TreeNode* leftChild;
-    TreeNode* rightChild;
-    TreeNode* parentNode;
-
-    explicit TreeNode(int data) : value(data), nodeColor(RED), leftChild(nullptr), rightChild(nullptr), parentNode(nullptr) {}
-};
-
-class RBTree {
+// Class template for Red-Black Tree
+template <typename T> class RedBlackTree {
 private:
-    TreeNode* rootNode;
+    // Structure for a node in Red-Black Tree
+    struct Node {
+        T data;
+        Color color;
+        Node* parent;
+        Node* left;
+        Node* right;
 
-    // Perform left rotation
-    void rotateLeft(TreeNode* current) {
-        if (current == nullptr || current->rightChild == nullptr)
-            return;
+        // Constructor to initialize node with data and
+        // color
+        Node(T value)
+            : data(value)
+            , color(RED)
+            , parent(nullptr)
+            , left(nullptr)
+            , right(nullptr)
+        {
+        }
+    };
 
-        TreeNode* temp = current->rightChild;
-        current->rightChild = temp->leftChild;
-        if (temp->leftChild != nullptr)
-            temp->leftChild->parentNode = current;
-        temp->parentNode = current->parentNode;
-        if (current->parentNode == nullptr)
-            rootNode = temp;
-        else if (current == current->parentNode->leftChild)
-            current->parentNode->leftChild = temp;
+    Node* root; // Root of the Red-Black Tree
+
+    // Utility function: Left Rotation
+    void rotateLeft(Node*& node)
+    {
+        Node* child = node->right;
+        node->right = child->left;
+        if (node->right != nullptr)
+            node->right->parent = node;
+        child->parent = node->parent;
+        if (node->parent == nullptr)
+            root = child;
+        else if (node == node->parent->left)
+            node->parent->left = child;
         else
-            current->parentNode->rightChild = temp;
-        temp->leftChild = current;
-        current->parentNode = temp;
+            node->parent->right = child;
+        child->left = node;
+        node->parent = child;
     }
 
-    // Perform right rotation
-    void rotateRight(TreeNode* current) {
-        if (current == nullptr || current->leftChild == nullptr)
-            return;
-
-        TreeNode* temp = current->leftChild;
-        current->leftChild = temp->rightChild;
-        if (temp->rightChild != nullptr)
-            temp->rightChild->parentNode = current;
-        temp->parentNode = current->parentNode;
-        if (current->parentNode == nullptr)
-            rootNode = temp;
-        else if (current == current->parentNode->leftChild)
-            current->parentNode->leftChild = temp;
+    // Utility function: Right Rotation
+    void rotateRight(Node*& node)
+    {
+        Node* child = node->left;
+        node->left = child->right;
+        if (node->left != nullptr)
+            node->left->parent = node;
+        child->parent = node->parent;
+        if (node->parent == nullptr)
+            root = child;
+        else if (node == node->parent->left)
+            node->parent->left = child;
         else
-            current->parentNode->rightChild = temp;
-        temp->rightChild = current;
-        current->parentNode = temp;
+            node->parent->right = child;
+        child->right = node;
+        node->parent = child;
     }
 
-    // Fix violations after insertion
-    void resolveInsert(TreeNode* newNode) {
-        while (newNode != rootNode && newNode->parentNode->nodeColor == RED) {
-            if (newNode->parentNode == newNode->parentNode->parentNode->leftChild) {
-                TreeNode* uncle = newNode->parentNode->parentNode->rightChild;
-                if (uncle != nullptr && uncle->nodeColor == RED) {
-                    newNode->parentNode->nodeColor = BLACK;
-                    uncle->nodeColor = BLACK;
-                    newNode->parentNode->parentNode->nodeColor = RED;
-                    newNode = newNode->parentNode->parentNode;
-                } else {
-                    if (newNode == newNode->parentNode->rightChild) {
-                        newNode = newNode->parentNode;
-                        rotateLeft(newNode);
-                    }
-                    newNode->parentNode->nodeColor = BLACK;
-                    newNode->parentNode->parentNode->nodeColor = RED;
-                    rotateRight(newNode->parentNode->parentNode);
+    // Utility function: Fixing Insertion Violation
+    void fixInsert(Node*& node)
+    {
+        Node* parent = nullptr;
+        Node* grandparent = nullptr;
+        while (node != root && node->color == RED
+               && node->parent->color == RED) {
+            parent = node->parent;
+            grandparent = parent->parent;
+            if (parent == grandparent->left) {
+                Node* uncle = grandparent->right;
+                if (uncle != nullptr
+                    && uncle->color == RED) {
+                    grandparent->color = RED;
+                    parent->color = BLACK;
+                    uncle->color = BLACK;
+                    node = grandparent;
                 }
-            } else {
-                TreeNode* uncle = newNode->parentNode->parentNode->leftChild;
-                if (uncle != nullptr && uncle->nodeColor == RED) {
-                    newNode->parentNode->nodeColor = BLACK;
-                    uncle->nodeColor = BLACK;
-                    newNode->parentNode->parentNode->nodeColor = RED;
-                    newNode = newNode->parentNode->parentNode;
-                } else {
-                    if (newNode == newNode->parentNode->leftChild) {
-                        newNode = newNode->parentNode;
-                        rotateRight(newNode);
+                else {
+                    if (node == parent->right) {
+                        rotateLeft(parent);
+                        node = parent;
+                        parent = node->parent;
                     }
-                    newNode->parentNode->nodeColor = BLACK;
-                    newNode->parentNode->parentNode->nodeColor = RED;
-                    rotateLeft(newNode->parentNode->parentNode);
+                    rotateRight(grandparent);
+                    swap(parent->color, grandparent->color);
+                    node = parent;
+                }
+            }
+            else {
+                Node* uncle = grandparent->left;
+                if (uncle != nullptr
+                    && uncle->color == RED) {
+                    grandparent->color = RED;
+                    parent->color = BLACK;
+                    uncle->color = BLACK;
+                    node = grandparent;
+                }
+                else {
+                    if (node == parent->left) {
+                        rotateRight(parent);
+                        node = parent;
+                        parent = node->parent;
+                    }
+                    rotateLeft(grandparent);
+                    swap(parent->color, grandparent->color);
+                    node = parent;
                 }
             }
         }
-        rootNode->nodeColor = BLACK;
+        root->color = BLACK;
     }
 
-    // Replace one subtree with another
-    void replaceSubtree(TreeNode* oldNode, TreeNode* newNode) {
-        if (oldNode->parentNode == nullptr)
-            rootNode = newNode;
-        else if (oldNode == oldNode->parentNode->leftChild)
-            oldNode->parentNode->leftChild = newNode;
-        else
-            oldNode->parentNode->rightChild = newNode;
-        if (newNode != nullptr)
-            newNode->parentNode = oldNode->parentNode;
-    }
-
-    // Delete a specific node
-    void removeNode(TreeNode* targetNode) {
-        if (targetNode == nullptr)
-            return;
-
-        TreeNode* tempNode = targetNode;
-        TreeNode* childNode = nullptr;
-        NodeColor originalColor = tempNode->nodeColor;
-
-        if (targetNode->leftChild == nullptr) {
-            childNode = targetNode->rightChild;
-            replaceSubtree(targetNode, targetNode->rightChild);
-        } else if (targetNode->rightChild == nullptr) {
-            childNode = targetNode->leftChild;
-            replaceSubtree(targetNode, targetNode->leftChild);
-        } else {
-            tempNode = findMinimum(targetNode->rightChild);
-            originalColor = tempNode->nodeColor;
-            childNode = tempNode->rightChild;
-
-            if (tempNode->parentNode == targetNode) {
-                if (childNode != nullptr)
-                    childNode->parentNode = tempNode;
-            } else {
-                replaceSubtree(tempNode, tempNode->rightChild);
-                tempNode->rightChild = targetNode->rightChild;
-                if (tempNode->rightChild != nullptr)
-                    tempNode->rightChild->parentNode = tempNode;
+    // Utility function: Fixing Deletion Violation
+    void fixDelete(Node*& node)
+    {
+        while (node != root && node->color == BLACK) {
+            if (node == node->parent->left) {
+                Node* sibling = node->parent->right;
+                if (sibling->color == RED) {
+                    sibling->color = BLACK;
+                    node->parent->color = RED;
+                    rotateLeft(node->parent);
+                    sibling = node->parent->right;
+                }
+                if ((sibling->left == nullptr
+                     || sibling->left->color == BLACK)
+                    && (sibling->right == nullptr
+                        || sibling->right->color
+                               == BLACK)) {
+                    sibling->color = RED;
+                    node = node->parent;
+                }
+                else {
+                    if (sibling->right == nullptr
+                        || sibling->right->color == BLACK) {
+                        if (sibling->left != nullptr)
+                            sibling->left->color = BLACK;
+                        sibling->color = RED;
+                        rotateRight(sibling);
+                        sibling = node->parent->right;
+                    }
+                    sibling->color = node->parent->color;
+                    node->parent->color = BLACK;
+                    if (sibling->right != nullptr)
+                        sibling->right->color = BLACK;
+                    rotateLeft(node->parent);
+                    node = root;
+                }
             }
-            replaceSubtree(targetNode, tempNode);
-            tempNode->leftChild = targetNode->leftChild;
-            if (tempNode->leftChild != nullptr)
-                tempNode->leftChild->parentNode = tempNode;
-            tempNode->nodeColor = targetNode->nodeColor;
+            else {
+                Node* sibling = node->parent->left;
+                if (sibling->color == RED) {
+                    sibling->color = BLACK;
+                    node->parent->color = RED;
+                    rotateRight(node->parent);
+                    sibling = node->parent->left;
+                }
+                if ((sibling->left == nullptr
+                     || sibling->left->color == BLACK)
+                    && (sibling->right == nullptr
+                        || sibling->right->color
+                               == BLACK)) {
+                    sibling->color = RED;
+                    node = node->parent;
+                }
+                else {
+                    if (sibling->left == nullptr
+                        || sibling->left->color == BLACK) {
+                        if (sibling->right != nullptr)
+                            sibling->right->color = BLACK;
+                        sibling->color = RED;
+                        rotateLeft(sibling);
+                        sibling = node->parent->left;
+                    }
+                    sibling->color = node->parent->color;
+                    node->parent->color = BLACK;
+                    if (sibling->left != nullptr)
+                        sibling->left->color = BLACK;
+                    rotateRight(node->parent);
+                    node = root;
+                }
+            }
         }
-
-        if (originalColor == BLACK && childNode != nullptr)
-            resolveDelete(childNode);
-
-        delete targetNode;
+        node->color = BLACK;
     }
 
-    // Fix violations after deletion
-    void resolveDelete(TreeNode* node) {
-        // Similar structure to original logic
+    // Utility function: Find Node with Minimum Value
+    Node* minValueNode(Node*& node)
+    {
+        Node* current = node;
+        while (current->left != nullptr)
+            current = current->left;
+        return current;
     }
 
-    // Find the smallest node in a subtree
-    TreeNode* findMinimum(TreeNode* subtreeRoot) {
-        while (subtreeRoot->leftChild != nullptr)
-            subtreeRoot = subtreeRoot->leftChild;
-        return subtreeRoot;
+    // Utility function: Transplant nodes in Red-Black Tree
+    void transplant(Node*& root, Node*& u, Node*& v)
+    {
+        if (u->parent == nullptr)
+            root = v;
+        else if (u == u->parent->left)
+            u->parent->left = v;
+        else
+            u->parent->right = v;
+        if (v != nullptr)
+            v->parent = u->parent;
     }
 
-    // Print the tree structure
-    void displayTree(TreeNode* subtreeRoot, int indent) {
-        constexpr int SPACING = 5;
-        if (subtreeRoot == nullptr)
-            return;
-        indent += SPACING;
-        displayTree(subtreeRoot->rightChild, indent);
-        std::cout << std::endl;
-        for (int i = SPACING; i < indent; i++)
-            std::cout << " ";
-        std::cout << subtreeRoot->value << "(" << ((subtreeRoot->nodeColor == RED) ? "RED" : "BLACK") << ")" << std::endl;
-        displayTree(subtreeRoot->leftChild, indent);
+    // Utility function: Helper to print Red-Black Tree
+    void printHelper(Node* root, string indent, bool last)
+    {
+        if (root != nullptr) {
+            cout << indent;
+            if (last) {
+                cout << "R----";
+                indent += "   ";
+            }
+            else {
+                cout << "L----";
+                indent += "|  ";
+            }
+            string sColor
+                = (root->color == RED) ? "RED" : "BLACK";
+            cout << root->data << "(" << sColor << ")"
+                 << endl;
+            printHelper(root->left, indent, false);
+            printHelper(root->right, indent, true);
+        }
+    }
+
+    // Utility function: Delete all nodes in the Red-Black
+    // Tree
+    void deleteTree(Node* node)
+    {
+        if (node != nullptr) {
+            deleteTree(node->left);
+            deleteTree(node->right);
+            delete node;
+        }
     }
 
 public:
-    RBTree() : rootNode(nullptr) {}
-
-    // Insert a value
-    void addValue(int val) {
-        TreeNode* newNode = new TreeNode(val);
-        TreeNode* tempParent = nullptr;
-        TreeNode* tempCurrent = rootNode;
-
-        while (tempCurrent != nullptr) {
-            tempParent = tempCurrent;
-            if (newNode->value < tempCurrent->value)
-                tempCurrent = tempCurrent->leftChild;
-            else
-                tempCurrent = tempCurrent->rightChild;
-        }
-
-        newNode->parentNode = tempParent;
-        if (tempParent == nullptr)
-            rootNode = newNode;
-        else if (newNode->value < tempParent->value)
-            tempParent->leftChild = newNode;
-        else
-            tempParent->rightChild = newNode;
-
-        resolveInsert(newNode);
+    // Constructor: Initialize Red-Black Tree
+    RedBlackTree()
+        : root(nullptr)
+    {
     }
 
-    // Delete a value
-    void deleteValue(int val) {
-        TreeNode* target = rootNode;
-        while (target != nullptr) {
-            if (val < target->value)
-                target = target->leftChild;
-            else if (val > target->value)
-                target = target->rightChild;
+    // Destructor: Delete Red-Black Tree
+    ~RedBlackTree() { deleteTree(root); }
+
+    // Public function: Insert a value into Red-Black Tree
+    void insert(T key)
+    {
+        Node* node = new Node(key);
+        Node* parent = nullptr;
+        Node* current = root;
+        while (current != nullptr) {
+            parent = current;
+            if (node->data < current->data)
+                current = current->left;
+            else
+                current = current->right;
+        }
+        node->parent = parent;
+        if (parent == nullptr)
+            root = node;
+        else if (node->data < parent->data)
+            parent->left = node;
+        else
+            parent->right = node;
+        fixInsert(node);
+    }
+
+    // Public function: Remove a value from Red-Black Tree
+    void remove(T key)
+    {
+        Node* node = root;
+        Node* z = nullptr;
+        Node* x = nullptr;
+        Node* y = nullptr;
+        while (node != nullptr) {
+            if (node->data == key) {
+                z = node;
+            }
+
+            if (node->data <= key) {
+                node = node->right;
+            }
             else {
-                removeNode(target);
-                return;
+                node = node->left;
             }
         }
-        std::cout << "Value " << val << " not found in the tree." << std::endl;
+
+        if (z == nullptr) {
+            cout << "Key not found in the tree" << endl;
+            return;
+        }
+
+        y = z;
+        Color yOriginalColor = y->color;
+        if (z->left == nullptr) {
+            x = z->right;
+            transplant(root, z, z->right);
+        }
+        else if (z->right == nullptr) {
+            x = z->left;
+            transplant(root, z, z->left);
+        }
+        else {
+            y = minValueNode(z->right);
+            yOriginalColor = y->color;
+            x = y->right;
+            if (y->parent == z) {
+                if (x != nullptr)
+                    x->parent = y;
+            }
+            else {
+                transplant(root, y, y->right);
+                y->right = z->right;
+                y->right->parent = y;
+            }
+            transplant(root, z, y);
+            y->left = z->left;
+            y->left->parent = y;
+            y->color = z->color;
+        }
+        delete z;
+        if (yOriginalColor == BLACK) {
+            fixDelete(x);
+        }
     }
 
-    // Print the tree structure
-    void showTree() {
-        displayTree(rootNode, 0);
+    // Public function: Print the Red-Black Tree
+    void printTree()
+    {
+        if (root == nullptr)
+            cout << "Tree is empty." << endl;
+        else {
+            cout << "Red-Black Tree:" << endl;
+            printHelper(root, "", true);
+        }
     }
 };
 
-int main() {
-    RBTree tree;
+// Driver program to test Red-Black Tree
+int main()
+{
+    RedBlackTree<int> rbtree;
 
-    tree.addValue(10);
-    tree.addValue(5);
-    tree.addValue(15);
-    tree.addValue(3);
-    tree.addValue(7);
-    tree.addValue(12);
-    tree.addValue(18);
+    // Inserting values into Red-Black Tree
+    rbtree.insert(7);
+    rbtree.insert(3);
+    rbtree.insert(18);
+    rbtree.insert(10);
+    rbtree.insert(22);
+    rbtree.insert(8);
+    rbtree.insert(11);
+    rbtree.insert(26);
+    rbtree.insert(2);
+    rbtree.insert(6);
 
-    std::cout << "Tree structure:" << std::endl;
-    tree.showTree();
+    // Printing Red-Black Tree
+    rbtree.printTree();
 
-    tree.deleteValue(5);
-    std::cout << "\nAfter deleting value 5:" << std::endl;
-    tree.showTree();
+    // Deleting nodes from Red-Black Tree
+    cout << "After deleting 18:" << endl;
+    rbtree.remove(18);
+    rbtree.printTree();
+
+    cout << "After deleting 11:" << endl;
+    rbtree.remove(11);
+    rbtree.printTree();
+
+    cout << "After deleting 3:" << endl;
+    rbtree.remove(3);
+    rbtree.printTree();
 
     return 0;
 }
