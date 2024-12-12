@@ -67,10 +67,15 @@ void addPlayer(string name,int score){
             
         }
         curNode=curNode->next[0];
-// the player already exist so just update his score
-        if(curNode!=NULL&&curNode->name==name){
+// the player already exist so just update his score if the new score is different
+
+
+        if(curNode!=NULL&&curNode->name==name&&curNode->score!=score){
             curNode->score=score;
             cout<<"successfully updated score of player "<<name<<" to "<<score<<"\n";}
+        else if(curNode!=NULL&&curNode->name==name&&curNode->score==score){
+            
+            cout<<"player "<<name<<" already exists with the score "<<score<<"\n";}
         else{
             int r=createRandomLevel();
             if(r>level){
@@ -185,6 +190,7 @@ int main() {
     game.addPlayer("Player1", 100);
     game.addPlayer("Player2", 50);
     game.addPlayer("Player3", 80);
+    game.addPlayer("Player3", 80);// if I try to update with the same score , no update allowed
 
     // Dynamic score updates
     game.addPlayer("Player1", 90);
@@ -210,6 +216,7 @@ int main() {
     for (auto& player : leaderboard) {
         cout << player.first << ": " << player.second << endl;
     }
+    game.display();
 
     return 0;
 }

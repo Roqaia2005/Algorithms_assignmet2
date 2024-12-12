@@ -7,10 +7,10 @@ using namespace std;
 class Node{
     public:
     int value;
-    Node **next;
+    Node **next;//array of pointers
     Node(int value,int level){
         this->value=value;
-        next=new Node*[level+1];
+        next=new Node*[level+1];// 0 based level so size is level+1
         memset(next, 0, sizeof(Node*)*(level+1));
     }
 
